@@ -1,25 +1,29 @@
 from fastapi import FastAPI, Form, UploadFile, File, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from openai import OpenAI
 from dotenv import load_dotenv
+from pathlib import Path
 import os
 
 load_dotenv()
 
+BASE_DIR = Path(__file__).resolve().parent
+
 app = FastAPI()
 
-app.mount("/", StaticFiles(directory="static", html=True), name="static")
+# Serve the frontend static files
+app.mount("/", StaticFiles(directory=BASE_DIR / "static", html=True), name="static")
 
+# Optional: Redirect / to /index.html manually (if needed)
 @app.get("/", include_in_schema=False)
 async def root():
-    print("✅ Serving index.html at /")
-    return FileResponse("./static/index.html", media_type="text/html")
+    return RedirectResponse(url="/index.html")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://127.0.0.1:8001"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
