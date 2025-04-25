@@ -16,14 +16,6 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 async def root():
     return FileResponse("./static/index.html", media_type="text/html")
 
-client = OpenAI(
-    api_key=os.getenv("OPENAI_API_KEY"))
-EMAIL_SENDER = os.getenv("EMAIL_SENDER", "devin@adeptwell.com")
-EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
-SMTP_SERVER = "smtp.gmail.com"
-SMTP_PORT = 587
-
-app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://127.0.0.1:8001"],
@@ -31,6 +23,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+EMAIL_SENDER = os.getenv("EMAIL_SENDER", "devin@adeptwell.com")
+EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
+SMTP_SERVER = "smtp.gmail.com"
+SMTP_PORT = 587
 
 def extract_text(uploaded_file: UploadFile):
     try:
