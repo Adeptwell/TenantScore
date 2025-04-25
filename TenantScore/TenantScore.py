@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Form, UploadFile, File, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles  # ✅ NEW
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from openai import OpenAI
 from dotenv import load_dotenv
 import os
@@ -8,7 +9,12 @@ import os
 load_dotenv()
 
 app = FastAPI()
-app.mount("/", StaticFiles(directory="static", html=True), name="static")
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+@app.get("/")
+def read_root():
+    return FileResponse("static/index.html")
 
 client = OpenAI(
     api_key=os.getenv("OPENAI_API_KEY"))
