@@ -14,6 +14,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/", include_in_schema=False)
 async def root():
+    print("✅ Serving index.html at /")
     return FileResponse("./static/index.html", media_type="text/html")
 
 app.add_middleware(
