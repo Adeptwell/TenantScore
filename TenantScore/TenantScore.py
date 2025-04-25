@@ -1,19 +1,17 @@
 from fastapi import FastAPI, Form, UploadFile, File, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles  # ✅ NEW
 from openai import OpenAI
-import re, os, smtplib, textwrap, traceback, requests, asyncio
-from datetime import datetime
-from email.message import EmailMessage
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import LETTER
-from reportlab.lib import colors
-from textwrap import wrap
-import fitz  # PyMuPDF
-
+from dotenv import load_dotenv
 import os
-from openai import OpenAI
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+load_dotenv()
+
+app = FastAPI()
+app.mount("/", StaticFiles(directory=".", html=True), name="static")  # ✅ NEW
+
+client = OpenAI(
+    api_key=os.getenv("OPENAI_API_KEY"))
 EMAIL_SENDER = os.getenv("EMAIL_SENDER", "devin@adeptwell.com")
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 SMTP_SERVER = "smtp.gmail.com"
