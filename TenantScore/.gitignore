@@ -1,9 +1,8 @@
 __pycache__/
 *.pyc
-*.pdf
-*.txt
 uploads/
-temp*.pdf
 reports/
-start.sh
+temp*.pdf
 .env
+
+
