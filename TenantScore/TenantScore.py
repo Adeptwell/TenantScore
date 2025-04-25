@@ -8,7 +8,7 @@ import os
 load_dotenv()
 
 app = FastAPI()
-app.mount("/", StaticFiles(directory=".", html=True), name="static")  # ✅ NEW
+app.mount("/", StaticFiles(directory="static", html=True), name="static")
 
 client = OpenAI(
     api_key=os.getenv("OPENAI_API_KEY"))
