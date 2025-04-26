@@ -80,23 +80,27 @@
     }
     .checkbox-row {
       display: flex;
+      flex-wrap: wrap;
       align-items: flex-start;
     }
     .checkbox-row input[type="checkbox"] {
       margin-right: 10px;
+      margin-top: 5px;
       transform: scale(1.2);
-      margin-top: 2px;
+    }
+    .checkbox-text {
+      flex: 1 1 80%;
+      display: flex;
+      flex-direction: column;
     }
     .checkbox-label {
       font-weight: bold;
       font-size: 15px;
-      margin: 0;
     }
     .checkbox-subtext {
-      margin-left: 28px;
-      margin-top: 6px;
       font-size: 13px;
       color: #666;
+      margin-top: 4px;
     }
     @media (max-width: 600px) {
       h2 {
@@ -183,10 +187,12 @@
       <div class="checkbox-container">
         <div class="checkbox-row">
           <input type="checkbox" id="run_certn" />
-          <label for="run_certn" class="checkbox-label">Run background & credit check via Certn</label>
-        </div>
-        <div class="checkbox-subtext">
-          Sends the applicant a link to authorize a soft credit and background screening.
+          <div class="checkbox-text">
+            <label for="run_certn" class="checkbox-label">Run background & credit check via Certn</label>
+            <div class="checkbox-subtext">
+              Sends the applicant a link to authorize a soft credit and background screening.
+            </div>
+          </div>
         </div>
       </div>
 
