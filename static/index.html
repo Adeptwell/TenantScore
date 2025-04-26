@@ -2,27 +2,67 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TenantScore | Application</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 40px; background: #f4f4f4; }
-    .container {
-      max-width: 600px; margin: auto; background: #fff; padding: 24px;
-      border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 1px solid #ddd;
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f4f4f4;
+      margin: 0;
     }
-    h2 { text-align: center; color: #009CDE; }
-    label { display: block; margin-top: 15px; font-weight: bold; }
+    .container {
+      max-width: 600px;
+      width: 100%;
+      margin: auto;
+      background: #fff;
+      padding: 24px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      border: 1px solid #ddd;
+    }
+    h2 {
+      text-align: center;
+      color: #009CDE;
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+      font-size: 15px;
+    }
     input, select, button, textarea {
-      width: 100%; padding: 10px; margin-top: 6px;
-      border-radius: 4px; border: 1px solid #ccc; box-sizing: border-box;
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      margin-bottom: 12px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+      font-size: 15px;
     }
     button {
-      background-color: #009CDE; color: white; border: none;
-      margin-top: 20px; font-size: 16px; cursor: pointer;
+      background-color: #009CDE;
+      color: white;
+      border: none;
+      margin-top: 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 4px;
     }
-    button:hover { background-color: #007bb2; }
+    button:hover {
+      background-color: #007bb2;
+    }
     #responseBox {
-      margin-top: 20px; padding: 16px; background: #e6f7fc;
-      border-left: 4px solid #009CDE; border-radius: 4px; display: none;
+      margin-top: 20px;
+      padding: 16px;
+      background: #e6f7fc;
+      border-left: 4px solid #009CDE;
+      border-radius: 4px;
+      display: none;
+      font-size: 15px;
     }
     #spinner {
       display: none;
@@ -30,6 +70,47 @@
       text-align: center;
       font-size: 15px;
       color: #555;
+    }
+    .checkbox-container {
+      background: #f9f9f9;
+      padding: 14px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-top: 20px;
+    }
+    .checkbox-row {
+      display: flex;
+      align-items: flex-start;
+    }
+    .checkbox-row input[type="checkbox"] {
+      margin-right: 10px;
+      transform: scale(1.2);
+      margin-top: 2px;
+    }
+    .checkbox-label {
+      font-weight: bold;
+      font-size: 15px;
+      margin: 0;
+    }
+    .checkbox-subtext {
+      margin-left: 28px;
+      margin-top: 6px;
+      font-size: 13px;
+      color: #666;
+    }
+    @media (max-width: 600px) {
+      h2 {
+        font-size: 22px;
+      }
+      label, input, textarea, button {
+        font-size: 15px;
+      }
+      .checkbox-label {
+        font-size: 14px;
+      }
+      .checkbox-subtext {
+        font-size: 12px;
+      }
     }
   </style>
 </head>
@@ -99,14 +180,12 @@
       <label for="business_plan_file">Upload Business Plan (optional)</label>
       <input type="file" id="business_plan_file">
 
-      <div style="margin-top: 25px; background: #f9f9f9; padding: 14px; border: 1px solid #ccc; border-radius: 6px;">
-        <div style="display: flex; align-items: center;">
-          <input type="checkbox" id="run_certn" style="transform: scale(1.3); margin-right: 10px;" />
-          <label for="run_certn" style="font-weight: bold; font-size: 15px; margin: 0;">
-            Run background & credit check via Certn
-          </label>
+      <div class="checkbox-container">
+        <div class="checkbox-row">
+          <input type="checkbox" id="run_certn" />
+          <label for="run_certn" class="checkbox-label">Run background & credit check via Certn</label>
         </div>
-        <div style="margin-left: 28px; margin-top: 6px; font-size: 13px; color: #666;">
+        <div class="checkbox-subtext">
           Sends the applicant a link to authorize a soft credit and background screening.
         </div>
       </div>
@@ -150,7 +229,7 @@
       }
 
       formData.append("run_certn", document.getElementById("run_certn").checked);
-      formData.append("agent_key", "andy"); // ✅ ensure branding gets applied
+      formData.append("agent_key", "andy");
 
       try {
         const response = await fetch("https://tenantscore.onrender.com/generate-score", {
