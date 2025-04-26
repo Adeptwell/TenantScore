@@ -71,29 +71,32 @@
       font-size: 15px;
       color: #555;
     }
-    .certn-container {
-      background: #f9f9f9;
-      padding: 14px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      margin-top: 20px;
-      text-align: left;
-    }
-    .certn-container input[type="checkbox"] {
-      transform: scale(1.2);
-      margin-bottom: 10px;
-    }
-    .certn-label {
-      font-weight: bold;
-      font-size: 15px;
-      display: block;
-      margin-top: 10px;
-    }
-    .certn-subtext {
-      font-size: 13px;
-      color: #666;
-      margin-top: 6px;
-    }
+    .certn-final-container {
+  background: #f9f9f9;
+  padding: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-top: 20px;
+  text-align: left;
+}
+
+.certn-final-container input[type="checkbox"] {
+  transform: scale(1.2);
+  margin-bottom: 10px;
+}
+
+.certn-final-label {
+  font-weight: bold;
+  font-size: 15px;
+  display: block;
+  margin-top: 10px;
+}
+
+.certn-final-subtext {
+  font-size: 13px;
+  color: #666;
+  margin-top: 6px;
+}
     @media (max-width: 600px) {
       h2 {
         font-size: 22px;
@@ -177,13 +180,13 @@
       <label for="business_plan_file">Upload Business Plan (optional)</label>
       <input type="file" id="business_plan_file">
 
-      <div class="certn-container">
-        <input type="checkbox" id="run_certn" />
-        <label for="run_certn" class="certn-label">Run background & credit check via Certn</label>
-        <div class="certn-subtext">
-          Sends the applicant a link to authorize a soft credit and background screening.
-        </div>
-      </div>
+      <div class="certn-final-container">
+  <input type="checkbox" id="run_certn" />
+  <label for="run_certn" class="certn-final-label">Run background & credit check via Certn</label>
+  <div class="certn-final-subtext">
+    Sends the applicant a link to authorize a soft credit and background screening.
+  </div>
+</div>
 
       <button type="submit">Submit</button>
     </form>
