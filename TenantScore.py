@@ -1,7 +1,8 @@
 from fastapi import FastAPI, Form, UploadFile, File, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from openai import OpenAI
-import re, os, smtplib, textwrap, traceback, requests, asyncio
+import re, os, smtplib, textwrap, traceback, asyncio
 from datetime import datetime
 from email.message import EmailMessage
 from reportlab.pdfgen import canvas
@@ -9,8 +10,6 @@ from reportlab.lib.pagesizes import LETTER
 from reportlab.lib import colors
 from textwrap import wrap
 import fitz  # PyMuPDF
-
-import os
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 EMAIL_SENDER = os.getenv("EMAIL_SENDER", "devin@adeptwell.com")
@@ -21,7 +20,7 @@ SMTP_PORT = 587
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://127.0.0.1:8001"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -130,57 +129,23 @@ def send_email(report_path, filename, business_name, agent_email):
         server.login(EMAIL_SENDER, EMAIL_PASSWORD)
         server.send_message(msg)
 
-from textwrap import wrap
-
 def create_base_pdf(data, filename, uploaded_files):
     base_path = os.path.join("reports", filename)
     os.makedirs("reports", exist_ok=True)
     c = canvas.Canvas(base_path, pagesize=LETTER)
     width, height = LETTER
-    y = height
+    y = height - 70
 
-    # ✅ Read agent_key from data
-    agent_key = data.get("agent_key", "").lower()
-
-    if agent_key == "andy":
-        header_color = colors.HexColor("#B2D7F0")  # Mountain West light blue
-        text_color = colors.HexColor("#0A3C66")    # Mountain West dark blue
-        header_title = "TenantScore Report – Andy Moffitt | Mountain West"
-    else:
-        header_color = colors.HexColor("#7E7B46")
-        text_color = colors.black
-        header_title = "TenantScore Report"
-
-
-    def header(text):
-        nonlocal y
-        c.setFont("Helvetica-Bold", 16)
-        c.setFillColor(header_color)
-        c.drawString(40, y, text)
-        c.setFillColor(text_color)
-        y -= 22
-
-    def subheader(text):
-        nonlocal y
-        c.setFont("Helvetica-Bold", 12)
-        c.setFillColor(text_color)
-        c.drawString(40, y, text)
-        y -= 16
-
-    def write_block(label, content):
-        nonlocal y
-        subheader(label)
-        c.setFont("Helvetica", 10)
-        c.setFillColor(text_color)
-        wrapped = wrap(content, 95)
-        for line in wrapped:
-            c.drawString(50, y, line)
-            y -= 14
-            if y < 80:
-                footer()
-                c.showPage()
-                y = height - 50
-        y -= 10
+    header_color = colors.HexColor("#7E7B46")
+    text_color = colors.black
+    c.setFillColor(header_color)
+    c.rect(0, height - 50, width, 50, stroke=0, fill=1)
+    c.setFillColor(colors.white)
+    c.setFont("Helvetica-Bold", 16)
+    c.drawString(40, height - 30, "TenantScore Report")
+    c.setFont("Helvetica", 10)
+    c.drawRightString(width - 40, height - 30, f"Submitted: {datetime.now().strftime('%B %d, %Y')}")
+    c.setFillColor(text_color)
 
     def footer():
         c.setFont("Helvetica-Oblique", 9)
@@ -188,59 +153,55 @@ def create_base_pdf(data, filename, uploaded_files):
         c.drawString(40, 40, "Powered by Adeptwell | TenantScore")
         c.setFillColor(text_color)
 
-        # Draw header bar
-    c.setFillColor(header_color)
-    c.rect(0, height - 50, width, 50, stroke=0, fill=1)
-    c.setFillColor(colors.white)
-    c.setFont("Helvetica-Bold", 16)
-    c.drawString(40, height - 30, header_title)
-    c.setFont("Helvetica", 10)
-    c.drawRightString(width - 40, height - 30, f"Submitted: {datetime.now().strftime('%B %d, %Y')}")
-    y -= 80
+    def check_page_space(lines_needed=1):
+        nonlocal y
+        if y - (lines_needed * 14) < 60:
+            footer()
+            c.showPage()
+            y = height - 70
 
-    # Applicant Info
-    header("Applicant Info")
-    c.setFont("Helvetica", 10)
-    c.setFillColor(text_color)
-    applicant_lines = [
-        f"Name: {data['tenant_name']} | Phone: {data['tenant_phone']} | Email: {data['tenant_email']}",
-        f"Business: {data['business_name']} | Type: {data['business_type']}",
-        f"Experience: {data['years_experience']} yrs | Revenue: ${data['monthly_revenue']} | Cash: ${data['cash_reserve']}",
-        f"Rent Budget: ${data['rent_budget']}"
-    ]
-    for block in applicant_lines:
-        for line in wrap(block, width=95):
+    def write_section(title, content):
+        nonlocal y
+        check_page_space(3)
+        c.setFont("Helvetica-Bold", 12)
+        c.drawString(40, y, title)
+        y -= 18
+        c.setFont("Helvetica", 10)
+        wrapped = wrap(content, 95)
+        for line in wrapped:
+            check_page_space(1)
             c.drawString(50, y, line)
             y -= 14
-        y -= 4
+        y -= 10
 
-    # Evaluation
-    header("AI Evaluation")
-    c.setFont("Helvetica-Bold", 12)
-    c.drawString(50, y, f"TenantScore: {data['score']}/100")
-    y -= 16
-    c.setFillColor(colors.green if data['risk_level'].lower() == "low risk"
-                   else colors.orange if data['risk_level'].lower() == "stable but new"
-                   else colors.red)
-    c.drawString(50, y, f"Risk Level: {data['risk_level']}")
-    c.setFillColor(text_color)
-    y -= 24
+    # Applicant Info
+    write_section("Applicant Info", 
+        f"Name: {data['tenant_name']} | Phone: {data['tenant_phone']} | Email: {data['tenant_email']}\n"
+        f"Business: {data['business_name']} | Type: {data['business_type']}\n"
+        f"Experience: {data['years_experience']} yrs | Revenue: ${data['monthly_revenue']} | Cash: ${data['cash_reserve']}\n"
+        f"Rent Budget: ${data['rent_budget']}"
+    )
 
-    write_block("Lease Summary", data['summary'])
-    write_block("Industry Insight", data['industry_insight'])
+    # AI Evaluation
+    write_section("AI Evaluation", 
+        f"TenantScore: {data['score']}/100\n"
+        f"Risk Level: {data['risk_level']}"
+    )
 
-    header("Document Insights")
+    write_section("Lease Summary", data['summary'])
+    write_section("Industry Insight", data['industry_insight'])
+
+    # Document Insights
     for section, insight in data['doc_insights'].items():
-        write_block(section + ":", insight)
+        write_section(section, insight)
 
     if data.get("certn_status"):
-        header("Background Check")
-        write_block("Certn Status", data['certn_status'])
+        write_section("Background Check", f"Certn Status: {data['certn_status']}")
 
     footer()
     c.save()
 
-    # Merge PDFs
+    # Merge uploaded files
     final = fitz.open(base_path)
     for upload in uploaded_files:
         if upload:
@@ -285,7 +246,6 @@ async def generate_score(
     business_plan_file: UploadFile = File(None),
     pfs_file: UploadFile = File(None),
     agent_key: str = Form("default")
-
 ):
     try:
         summaries = await asyncio.gather(
@@ -312,16 +272,16 @@ async def generate_score(
             "monthly_revenue": monthly_revenue,
             "cash_reserve": cash_reserve,
             "rent_budget": rent_budget,
-            "agent_key": agent_key  # ✅ This line makes Andy's colors load
+            "tenant_phone": tenant_phone,
+            "tenant_email": tenant_email,
+            "agent_key": agent_key
         }
 
-
         score, risk_level, summary, industry_insight = score_tenant(form_data, doc_insights)
+
         filename = f"TenantScore_{business_name.replace(' ', '_')}.pdf"
         report_path = create_base_pdf({
             **form_data,
-            "tenant_phone": tenant_phone,
-            "tenant_email": tenant_email,
             "score": score,
             "risk_level": risk_level,
             "summary": summary,
@@ -334,16 +294,9 @@ async def generate_score(
 
         background_tasks.add_task(send_email, report_path, filename, business_name, agent_email)
 
-        return {
-            "score": score,
-            "risk_level": risk_level,
-            "summary": summary,
-            "industry_insight": industry_insight,
-            "certn_status": "Pending",
-            "pdf_file": filename
-        }
+        return JSONResponse(content={"message": "TenantScore report generated successfully."})
 
     except Exception as e:
         print("ERROR:", e)
         traceback.print_exc()
-        return {"error": str(e)}
+        return JSONResponse(content={"error": str(e)}, status_code=500)
