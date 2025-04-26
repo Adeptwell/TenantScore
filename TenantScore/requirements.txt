@@ -1,9 +1,0 @@
-fastapi==0.100.0
-uvicorn==0.22.0
-openai==1.2.3
-python-multipart==0.0.6
-email-validator>=2.0.0
-reportlab==3.6.12
-PyMuPDF==1.22.5
-requests==2.31.0
-

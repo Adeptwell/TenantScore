@@ -1,8 +1,0 @@
-__pycache__/
-*.pyc
-uploads/
-reports/
-temp*.pdf
-.env
-
-
