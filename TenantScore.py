@@ -280,23 +280,25 @@ async def generate_score(
         score, risk_level, summary, industry_insight = score_tenant(form_data, doc_insights)
 
         filename = f"TenantScore_{business_name.replace(' ', '_')}.pdf"
-        report_path = create_base_pdf({
-            **form_data,
-            "score": score,
-            "risk_level": risk_level,
-            "summary": summary,
-            "industry_insight": industry_insight,
-            "doc_insights": doc_insights,
-            "certn_status": "Pending"
-        }, filename, [
-            pl_file, tax_return_1_file, tax_return_2_file, pfs_file, business_plan_file
-        ])
+report_path = create_base_pdf({
+    **form_data,
+    "score": score,
+    "risk_level": risk_level,
+    "summary": summary,
+    "industry_insight": industry_insight,
+    "doc_insights": doc_insights,
+    "certn_status": "Pending"
+}, filename, [
+    pl_file, tax_return_1_file, tax_return_2_file, pfs_file, business_plan_file
+])
 
-        background_tasks.add_task(send_email, report_path, filename, business_name, agent_email)
+background_tasks.add_task(send_email, report_path, filename, business_name, agent_email)
 
-        return JSONResponse(content={"message": "TenantScore report generated successfully."})
+return JSONResponse(content={
+    "score": score,
+    "risk_level": risk_level,
+    "summary": summary,
+    "industry_insight": industry_insight,
+    "pdf_file": filename
+})
 
-    except Exception as e:
-        print("ERROR:", e)
-        traceback.print_exc()
-        return JSONResponse(content={"error": str(e)}, status_code=500)
