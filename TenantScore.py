@@ -136,13 +136,23 @@ def create_base_pdf(data, filename, uploaded_files):
     width, height = LETTER
     y = height - 70
 
-    header_color = colors.HexColor("#7E7B46")
-    text_color = colors.black
+    # Branding logic
+    agent_key = data.get("agent_key", "").lower()
+
+    if agent_key == "andy":
+        header_color = colors.HexColor("#B2D7F0")  # Andy's light blue
+        text_color = colors.HexColor("#0A3C66")    # Andy's dark blue
+        header_title = "TenantScore Report – Andy Moffitt | Mountain West"
+    else:
+        header_color = colors.HexColor("#7E7B46")  # Default AdeptWell color
+        text_color = colors.black
+        header_title = "TenantScore Report"
+
     c.setFillColor(header_color)
     c.rect(0, height - 50, width, 50, stroke=0, fill=1)
     c.setFillColor(colors.white)
     c.setFont("Helvetica-Bold", 16)
-    c.drawString(40, height - 30, "TenantScore Report")
+    c.drawString(40, height - 30, header_title)
     c.setFont("Helvetica", 10)
     c.drawRightString(width - 40, height - 30, f"Submitted: {datetime.now().strftime('%B %d, %Y')}")
     c.setFillColor(text_color)
@@ -174,7 +184,7 @@ def create_base_pdf(data, filename, uploaded_files):
             y -= 14
         y -= 10
 
-    # Applicant Info
+    # Sections
     write_section("Applicant Info", 
         f"Name: {data['tenant_name']} | Phone: {data['tenant_phone']} | Email: {data['tenant_email']}\n"
         f"Business: {data['business_name']} | Type: {data['business_type']}\n"
@@ -182,7 +192,6 @@ def create_base_pdf(data, filename, uploaded_files):
         f"Rent Budget: ${data['rent_budget']}"
     )
 
-    # AI Evaluation
     write_section("AI Evaluation", 
         f"TenantScore: {data['score']}/100\n"
         f"Risk Level: {data['risk_level']}"
@@ -191,7 +200,6 @@ def create_base_pdf(data, filename, uploaded_files):
     write_section("Lease Summary", data['summary'])
     write_section("Industry Insight", data['industry_insight'])
 
-    # Document Insights
     for section, insight in data['doc_insights'].items():
         write_section(section, insight)
 
@@ -201,7 +209,6 @@ def create_base_pdf(data, filename, uploaded_files):
     footer()
     c.save()
 
-    # Merge uploaded files
     final = fitz.open(base_path)
     for upload in uploaded_files:
         if upload:
