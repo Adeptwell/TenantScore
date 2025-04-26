@@ -12,7 +12,7 @@ import fitz  # PyMuPDF
 
 import os
 
-Client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 EMAIL_SENDER = os.getenv("EMAIL_SENDER", "devin@adeptwell.com")
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 SMTP_SERVER = "smtp.gmail.com"
