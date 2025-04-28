@@ -169,20 +169,10 @@ def create_base_pdf(data, filename, uploaded_files):
     c.setFillColor(text_color)
 
     def footer():
-    c.setFont("Helvetica-Oblique", 9)
-    c.setFillColor(header_color)
-    text = "Powered by Adeptwell | TenantScore"
-    x, y_footer = 40, 40
-    c.drawString(x, y_footer, text)
-
-    # Calculate the clickable width for just "Powered by Adeptwell"
-    link_text = "Powered by Adeptwell"
-    link_width = c.stringWidth(link_text, "Helvetica-Oblique", 9)
-
-    # Create the clickable link
-    c.linkURL("https://adeptwell.com", (x, y_footer-2, x + link_width, y_footer+10), relative=0)
-
-    c.setFillColor(text_color)
+        c.setFont("Helvetica-Oblique", 9)
+        c.setFillColor(header_color)
+        c.drawString(40, 40, "Powered by Adeptwell | TenantScore")
+        c.setFillColor(text_color)
 
     def check_page_space(lines_needed=1):
         nonlocal y
