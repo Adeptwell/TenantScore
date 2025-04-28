@@ -11,6 +11,7 @@ from reportlab.lib import colors
 from textwrap import wrap
 import fitz  # PyMuPDF
 
+# --- Configuration ---
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 EMAIL_SENDER = os.getenv("EMAIL_SENDER", "devin@adeptwell.com")
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
@@ -18,6 +19,8 @@ SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
 
 app = FastAPI()
+
+# CORS settings
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -25,6 +28,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# --- Helper Functions ---
 
 def extract_text(uploaded_file: UploadFile):
     try:
@@ -136,18 +141,24 @@ def create_base_pdf(data, filename, uploaded_files):
     width, height = LETTER
     y = height - 70
 
-    # Branding logic
+    # --- Branding based on agent_key ---
     agent_key = data.get("agent_key", "").lower()
 
     if agent_key == "andy":
-        header_color = colors.HexColor("#B2D7F0")  # Andy's light blue
-        text_color = colors.HexColor("#0A3C66")    # Andy's dark blue
+        header_color = colors.HexColor("#B2D7F0")  # Andy blue
+        text_color = colors.HexColor("#0A3C66")
         header_title = "TenantScore Report – Andy Moffitt | Mountain West"
+    elif agent_key == "tanner":
+        header_color = colors.HexColor("#A7B84B")  # Tanner green
+        text_color = colors.black
+        header_title = "TenantScore Report – Tanner Olson | Legend Partners"
     else:
-        header_color = colors.HexColor("#7E7B46")  # Default AdeptWell color
+        header_color = colors.HexColor("#7E7B46")  # Default
         text_color = colors.black
         header_title = "TenantScore Report"
+    # ------------------------------------
 
+    # Header
     c.setFillColor(header_color)
     c.rect(0, height - 50, width, 50, stroke=0, fill=1)
     c.setFillColor(colors.white)
@@ -184,19 +195,14 @@ def create_base_pdf(data, filename, uploaded_files):
             y -= 14
         y -= 10
 
-    # Sections
+    # --- Write sections ---
     write_section("Applicant Info", 
         f"Name: {data['tenant_name']} | Phone: {data['tenant_phone']} | Email: {data['tenant_email']}\n"
         f"Business: {data['business_name']} | Type: {data['business_type']}\n"
         f"Experience: {data['years_experience']} yrs | Revenue: ${data['monthly_revenue']} | Cash: ${data['cash_reserve']}\n"
         f"Rent Budget: ${data['rent_budget']}"
     )
-
-    write_section("AI Evaluation", 
-        f"TenantScore: {data['score']}/100\n"
-        f"Risk Level: {data['risk_level']}"
-    )
-
+    write_section("AI Evaluation", f"TenantScore: {data['score']}/100\nRisk Level: {data['risk_level']}")
     write_section("Lease Summary", data['summary'])
     write_section("Industry Insight", data['industry_insight'])
 
@@ -209,6 +215,7 @@ def create_base_pdf(data, filename, uploaded_files):
     footer()
     c.save()
 
+    # Embed uploaded docs
     final = fitz.open(base_path)
     for upload in uploaded_files:
         if upload:
@@ -227,6 +234,8 @@ def create_base_pdf(data, filename, uploaded_files):
     final.close()
     os.replace(temp_path, base_path)
     return base_path
+
+# --- Main Endpoint ---
 
 @app.post("/generate-score")
 async def generate_score(
