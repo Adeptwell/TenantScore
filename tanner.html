@@ -160,6 +160,15 @@
       <label for="business_plan_file">Upload Business Plan (optional)</label>
       <input type="file" id="business_plan_file">
 
+      <!-- Certn Background Check Section -->
+      <div style="display: flex; align-items: center; margin-bottom: 16px;">
+        <input type="checkbox" id="run_certn" style="width: 18px; height: 18px; margin-right: 10px;">
+        <label for="run_certn" style="font-weight: 600; font-size: 15px; margin: 0;">Run background & credit check via Certn</label>
+      </div>
+      <div style="font-size: 13px; color: #666; margin-left: 28px; margin-top: -12px; margin-bottom: 24px;">
+        Sends the applicant a link to authorize a soft credit and background screening.
+      </div>
+
       <button type="submit">Submit Application</button>
     </form>
 
@@ -198,6 +207,7 @@
         formData.append("pfs_file", pfs);
       }
 
+      formData.append("run_certn", document.getElementById("run_certn").checked);
       formData.append("agent_key", "tanner");
 
       try {
